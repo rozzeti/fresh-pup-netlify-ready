@@ -1,6 +1,6 @@
 (function () {
   function applyLogo() {
-    var logoPath = "/images/logo.png";
+    var logoPath = "/images/freshpup-logo.png";
 
     var imgs = document.querySelectorAll(
       "img[alt*='logo' i], img[class*='logo' i], [class*='logo' i] img, header img, nav img"
@@ -21,6 +21,17 @@
           '" alt="Fresh Pup Logo" style="height:56px;width:auto;display:block"/>';
         return;
       }
+    }
+
+    var container = document.querySelector("header, nav");
+    if (container) {
+      var img = document.createElement("img");
+      img.src = logoPath;
+      img.alt = "Fresh Pup Logo";
+      img.style.height = "56px";
+      img.style.width = "auto";
+      img.style.display = "block";
+      container.insertBefore(img, container.firstChild);
     }
   }
 
