@@ -1,7 +1,19 @@
 // POST /api/auth/login
 // Authenticates the admin user using ADMIN_EMAIL and ADMIN_PASSWORD environment variables.
 // Returns a JWT token on success.
+const crypto = require("crypto");
 const { sign } = require("../_jwt");
+
+function timingSafeEqual(a, b) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // Still run the comparison to avoid early-exit timing leak, but always fail
+    crypto.timingSafeEqual(bufA, Buffer.alloc(bufA.length));
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -24,7 +36,7 @@ module.exports = async (req, res) => {
     return res.status(422).json({ detail: "Email and password are required" });
   }
 
-  if (email !== adminEmail || password !== adminPassword) {
+  if (!timingSafeEqual(email, adminEmail) || !timingSafeEqual(password, adminPassword)) {
     return res.status(401).json({ detail: "Invalid email or password" });
   }
 

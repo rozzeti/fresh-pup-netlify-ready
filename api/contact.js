@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     if (!name || !email || !message) {
       return res.status(422).json({ detail: "Name, email, and message are required" });
     }
-    return res.status(201).json({ id: Date.now().toString(), name, email, phone, message, created_at: new Date().toISOString() });
+    return res.status(201).json({ id: require("crypto").randomUUID(), name, email, phone, message, created_at: new Date().toISOString() });
   }
 
   return res.status(405).json({ detail: "Method not allowed" });

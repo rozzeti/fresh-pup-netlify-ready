@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
 
   if (req.method === "POST") {
     // Public booking creation
-    const booking = { id: Date.now().toString(), ...req.body, status: "pending", created_at: new Date().toISOString() };
+    const booking = { id: require("crypto").randomUUID(), ...req.body, status: "pending", created_at: new Date().toISOString() };
     return res.status(201).json(booking);
   }
 

@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
 
   if (req.method === "POST") {
     if (!requireAuth(req, res)) return;
-    const item = { id: Date.now().toString(), ...req.body, created_at: new Date().toISOString() };
+    const item = { id: require("crypto").randomUUID(), ...req.body, created_at: new Date().toISOString() };
     return res.status(201).json(item);
   }
 

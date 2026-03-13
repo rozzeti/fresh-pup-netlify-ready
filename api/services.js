@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
   if (req.method === "POST") {
     if (!requireAuth(req, res)) return;
-    const service = { id: Date.now().toString(), ...req.body, active: true };
+    const service = { id: require("crypto").randomUUID(), ...req.body, active: true };
     return res.status(201).json(service);
   }
 
