@@ -1,6 +1,7 @@
 [build]
 publish = "."
 command = "echo 'No build step needed'"
+# redeploy trigger: 2026-03-13
 
 [[redirects]]
 from = "/*"
