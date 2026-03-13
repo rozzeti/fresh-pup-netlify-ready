@@ -1,1 +1,3 @@
-{"buildCommand": "npm run build", "outputDirectory": "fresh-pup-netlify-ready/dist", "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]}
+{
+  "outputDirectory": "fresh-pup-netlify-ready"
+}
