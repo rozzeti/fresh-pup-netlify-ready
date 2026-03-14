@@ -1,16 +1,26 @@
-// Endpoint to list bookings
-const express = require('express');
-const router = express.Router();
+const clientPromise = require('../lib/mongodb');
+const { verifyToken } = require('../lib/jwt');
 
-// Mock data for bookings
-const bookings = [
-    { id: 1, name: 'Booking 1', date: '2026-03-13', status: 'confirmed' },
-    { id: 2, name: 'Booking 2', date: '2026-03-14', status: 'pending' },
-];
+module.exports = async function handler(req, res) {
+    if (req.method !== 'GET') {
+        res.setHeader('Allow', ['GET']);
+        return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+    }
 
-// GET /api/bookings/list
-router.get('/api/bookings/list', (req, res) => {
-    res.json(bookings);
-});
+    const token = req.cookies && req.cookies.admin_token;
+    const verified = verifyToken(token);
+    if (!verified) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-module.exports = router;
+    try {
+        const client = await clientPromise;
+        const db = client.db('freshpup');
+        const bookings = await db.collection('bookings').find({}).sort({ createdAt: -1 }).toArray();
+
+        return res.status(200).json(bookings);
+    } catch (error) {
+        console.error('Error fetching bookings:', error);
+        return res.status(500).json({ message: 'Error fetching bookings', error: error.message });
+    }
+};
