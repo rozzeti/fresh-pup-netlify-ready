@@ -9,8 +9,10 @@ module.exports = async function handler(req, res) {
     try {
         const bookingData = req.body;
 
-        if (!bookingData.ownerName || !bookingData.dogName || !bookingData.phone || !bookingData.service || !bookingData.dogSize || !bookingData.date || !bookingData.time) {
-            return res.status(400).json({ message: 'Missing required booking fields' });
+        const requiredFields = ['ownerName', 'dogName', 'phone', 'service', 'dogSize', 'date', 'time'];
+        const missingFields = requiredFields.filter((f) => !bookingData[f]);
+        if (missingFields.length > 0) {
+            return res.status(400).json({ message: `Missing required booking fields: ${missingFields.join(', ')}` });
         }
 
         const client = await clientPromise;

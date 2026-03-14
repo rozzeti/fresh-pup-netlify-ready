@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 
 if (!JWT_SECRET) {
-    console.warn('WARNING: JWT_SECRET environment variable is not set');
+    throw new Error('JWT_SECRET environment variable is not set');
 }
 
 function signToken(payload) {
