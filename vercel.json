@@ -1,3 +1,6 @@
 {
-  "outputDirectory": "fresh-pup-netlify-ready"
+  "outputDirectory": "fresh-pup-netlify-ready",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }

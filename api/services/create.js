@@ -18,6 +18,11 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ message: 'Name and basePrice are required' });
     }
 
+    const parsedPrice = Number(basePrice);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+        return res.status(400).json({ message: 'basePrice must be a non-negative number' });
+    }
+
     try {
         const client = await clientPromise;
         const db = client.db('freshpup');
@@ -25,7 +30,7 @@ module.exports = async function handler(req, res) {
         const service = {
             name,
             description: description || '',
-            basePrice: Number(basePrice),
+            basePrice: parsedPrice,
             duration: duration || '',
             createdAt: new Date(),
         };
@@ -38,3 +43,4 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ message: 'Error creating service', error: error.message });
     }
 };
+

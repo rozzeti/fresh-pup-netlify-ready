@@ -2,9 +2,14 @@
   "name": "fresh-pup-netlify-ready",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "seed-admin": "node scripts/seed-admin.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0"
   }
 }
+

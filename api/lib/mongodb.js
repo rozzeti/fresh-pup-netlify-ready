@@ -9,7 +9,7 @@ if (!uri) {
 let client;
 let clientPromise;
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.VERCEL_ENV === 'production' || process.env.NODE_ENV === 'production') {
     client = new MongoClient(uri);
     clientPromise = client.connect();
 } else {
