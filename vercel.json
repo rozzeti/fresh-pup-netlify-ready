@@ -1,6 +1,9 @@
 {
   "outputDirectory": "fresh-pup-netlify-ready",
   "rewrites": [
+    { "source": "/api/bookings", "destination": "/api/bookings/create" },
+    { "source": "/api/services", "destination": "/api/services/list" },
+    { "source": "/api/availability", "destination": "/api/availability/list" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

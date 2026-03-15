@@ -1,11 +1,17 @@
-const clientPromise = require('./_lib/mongodb');
-const { verifyToken } = require('./_lib/jwt');
+const clientPromise = require('../_lib/mongodb');
+const { verifyToken } = require('../_lib/jwt');
 
-module.exports = async function handler(req, res) {
-    if (req.method === 'POST') {
+module.exports = async (req, res) => {
+    const { action } = req.query;
+
+    if (action === 'create') {
+        if (req.method !== 'POST') {
+            res.setHeader('Allow', ['POST']);
+            return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+        }
+
         try {
             const bookingData = req.body;
-
             const requiredFields = ['ownerName', 'dogName', 'phone', 'service', 'dogSize', 'date', 'time'];
             const missingFields = requiredFields.filter((f) => !bookingData[f]);
             if (missingFields.length > 0) {
@@ -14,15 +20,11 @@ module.exports = async function handler(req, res) {
 
             const client = await clientPromise;
             const db = client.db('freshpup');
-            const bookingsCollection = db.collection('bookings');
-
-            const booking = {
+            const result = await db.collection('bookings').insertOne({
                 ...bookingData,
                 createdAt: new Date(),
                 status: 'pending',
-            };
-
-            const result = await bookingsCollection.insertOne(booking);
+            });
 
             return res.status(201).json({ message: 'Booking created successfully', bookingId: result.insertedId });
         } catch (error) {
@@ -31,10 +33,14 @@ module.exports = async function handler(req, res) {
         }
     }
 
-    if (req.method === 'GET') {
+    if (action === 'list') {
+        if (req.method !== 'GET') {
+            res.setHeader('Allow', ['GET']);
+            return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+        }
+
         const token = req.cookies && req.cookies.admin_token;
-        const verified = verifyToken(token);
-        if (!verified) {
+        if (!verifyToken(token)) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
@@ -42,7 +48,6 @@ module.exports = async function handler(req, res) {
             const client = await clientPromise;
             const db = client.db('freshpup');
             const bookings = await db.collection('bookings').find({}).sort({ createdAt: -1 }).toArray();
-
             return res.status(200).json(bookings);
         } catch (error) {
             console.error('Error fetching bookings:', error);
@@ -50,6 +55,5 @@ module.exports = async function handler(req, res) {
         }
     }
 
-    res.setHeader('Allow', ['GET', 'POST']);
-    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+    return res.status(404).json({ message: 'Not found.' });
 };
