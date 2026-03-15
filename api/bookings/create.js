@@ -1,27 +1,35 @@
-const { MongoClient } = require('mongodb');
+const clientPromise = require('../lib/mongodb');
 
-const uri = 'your_mongodb_connection_string'; // Replace with your MongoDB connection string
-const client = new MongoClient(uri);
-
-export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        try {
-            const bookingData = req.body; // Expecting booking data in request body
-            
-            await client.connect();
-            const database = client.db('your_database_name'); // Replace with your database name
-            const bookingsCollection = database.collection('bookings');
-
-            const result = await bookingsCollection.insertOne(bookingData);
-            
-            res.status(201).json({ message: 'Booking created successfully', bookingId: result.insertedId });
-        } catch (error) {
-            res.status(500).json({ message: 'Error saving booking', error: error.message });
-        } finally {
-            await client.close();
-        }
-    } else {
+module.exports = async function handler(req, res) {
+    if (req.method !== 'POST') {
         res.setHeader('Allow', ['POST']);
-        res.status(405).end(`Method ${req.method} Not Allowed`);
+        return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
     }
-}
+
+    try {
+        const bookingData = req.body;
+
+        const requiredFields = ['ownerName', 'dogName', 'phone', 'service', 'dogSize', 'date', 'time'];
+        const missingFields = requiredFields.filter((f) => !bookingData[f]);
+        if (missingFields.length > 0) {
+            return res.status(400).json({ message: `Missing required booking fields: ${missingFields.join(', ')}` });
+        }
+
+        const client = await clientPromise;
+        const db = client.db('freshpup');
+        const bookingsCollection = db.collection('bookings');
+
+        const booking = {
+            ...bookingData,
+            createdAt: new Date(),
+            status: 'pending',
+        };
+
+        const result = await bookingsCollection.insertOne(booking);
+
+        return res.status(201).json({ message: 'Booking created successfully', bookingId: result.insertedId });
+    } catch (error) {
+        console.error('Error creating booking:', error);
+        return res.status(500).json({ message: 'Error saving booking', error: error.message });
+    }
+};
