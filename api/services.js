@@ -1,4 +1,4 @@
-const clientPromise = require('../lib/mongodb');
+const clientPromise = require('./_lib/mongodb');
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') {
