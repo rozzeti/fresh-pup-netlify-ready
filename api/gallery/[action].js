@@ -13,7 +13,13 @@ module.exports.config = {
 
 function parseUpload(req) {
     return new Promise((resolve, reject) => {
-        const form = formidable({ maxFileSize: 10 * 1024 * 1024 }); // 10 MB
+        const form = formidable({
+            maxFileSize: 10 * 1024 * 1024, // 10 MB
+            // v3 filter: only accept image MIME types to prevent arbitrary file upload
+            filter({ mimetype }) {
+                return typeof mimetype === 'string' && mimetype.startsWith('image/');
+            },
+        });
         form.parse(req, (err, fields, files) => {
             if (err) return reject(err);
             resolve({ fields, files });
