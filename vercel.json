@@ -1,0 +1,1 @@
+{"outputDirectory": "fresh-pup-netlify-ready", "rewrites": [{"source": "/api/availability", "destination": "/api/availability/list"}, {"source": "/((?!api/).*)", "destination": "/index.html"}]}
