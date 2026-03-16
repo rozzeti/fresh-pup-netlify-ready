@@ -1,5 +1,5 @@
 const clientPromise = require('../_lib/mongodb');
-const { verifyToken } = require('../_lib/jwt');
+const { verifyToken, extractToken } = require('../_lib/jwt');
 
 module.exports = async (req, res) => {
     const { action } = req.query;
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
             return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
         }
 
-        const token = req.cookies && req.cookies.admin_token;
+        const token = extractToken(req);
         if (!verifyToken(token)) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
