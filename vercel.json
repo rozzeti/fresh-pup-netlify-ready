@@ -1,3 +1,1 @@
-{
-  "outputDirectory": "."
-}
+{\n  "outputDirectory": "dist",\n  "routes": {\n    "/api/(.*)": {\n      "methods": ["GET", "POST"],\n      "payload": "api/$1"\n    }\n  }\n}
