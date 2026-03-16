@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongodb');
 const clientPromise = require('../_lib/mongodb');
 const { verifyToken, extractToken } = require('../_lib/jwt');
 
@@ -25,53 +24,18 @@ function mapBooking(b) {
 }
 
 module.exports = async (req, res) => {
-    const { action } = req.query;
-
-    // Handle dynamic booking ID: PUT /api/bookings/:id
-    if (action && ObjectId.isValid(action) && action.length === 24) {
-        const token = extractToken(req);
-        if (!verifyToken(token)) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-
-        if (req.method === 'PUT') {
-            const { status } = req.body || {};
-            if (!status) {
-                return res.status(400).json({ message: 'status is required.' });
-            }
-            try {
-                const client = await clientPromise;
-                const db = client.db('freshpup');
-                const result = await db.collection('bookings').updateOne(
-                    { _id: new ObjectId(action) },
-                    { $set: { status, updatedAt: new Date() } }
-                );
-                if (result.matchedCount === 0) {
-                    return res.status(404).json({ message: 'Booking not found.' });
-                }
-                return res.status(200).json({ message: `Booking ${status}`, id: action, status });
-            } catch (error) {
-                console.error('Error updating booking:', error);
-                return res.status(500).json({ message: 'Error updating booking', error: error.message });
-            }
-        }
-
-        res.setHeader('Allow', ['PUT']);
-        return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
-    }
-
-    if (action === 'create') {
-        if (req.method !== 'POST') {
-            res.setHeader('Allow', ['POST']);
-            return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
-        }
-
+    if (req.method === 'POST') {
         try {
-            const bookingData = req.body || {};
+            const data = req.body || {};
+            const requiredFields = ['service_name', 'date', 'time', 'customer_name', 'customer_phone'];
+            const missing = requiredFields.filter((f) => !data[f]);
+            if (missing.length > 0) {
+                return res.status(400).json({ message: `Missing required fields: ${missing.join(', ')}` });
+            }
             const client = await clientPromise;
             const db = client.db('freshpup');
             const result = await db.collection('bookings').insertOne({
-                ...bookingData,
+                ...data,
                 createdAt: new Date(),
                 status: 'pending',
             });
@@ -82,17 +46,11 @@ module.exports = async (req, res) => {
         }
     }
 
-    if (action === 'list') {
-        if (req.method !== 'GET') {
-            res.setHeader('Allow', ['GET']);
-            return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
-        }
-
+    if (req.method === 'GET') {
         const token = extractToken(req);
         if (!verifyToken(token)) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
-
         try {
             const client = await clientPromise;
             const db = client.db('freshpup');
@@ -104,5 +62,6 @@ module.exports = async (req, res) => {
         }
     }
 
-    return res.status(404).json({ message: 'Not found.' });
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
 };

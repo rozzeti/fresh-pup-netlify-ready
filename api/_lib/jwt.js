@@ -20,4 +20,12 @@ function verifyToken(token) {
     }
 }
 
-module.exports = { signToken, verifyToken };
+function extractToken(req) {
+    const authHeader = req.headers && req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.substring(7);
+    }
+    return req.cookies && req.cookies.admin_token;
+}
+
+module.exports = { signToken, verifyToken, extractToken };

@@ -8,6 +8,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.5",
+    "formidable": "^2.1.2",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0"
   }
