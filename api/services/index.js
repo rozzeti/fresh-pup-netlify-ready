@@ -2,12 +2,14 @@ const clientPromise = require('../_lib/mongodb');
 const { verifyToken, extractToken } = require('../_lib/jwt');
 
 function mapService(s) {
+    const effectivePrice = s.basePrice || s.base_price || s.price || 0;
     return {
         id: s._id.toString(),
         name: s.name,
         description: s.description || '',
-        basePrice: s.basePrice || s.price || 0,
-        price: s.basePrice || s.price || 0,
+        basePrice: effectivePrice,
+        base_price: effectivePrice,
+        price: effectivePrice,
         duration: s.duration || '',
         category: s.category || 'grooming',
         is_mobile: s.is_mobile || false,
@@ -34,8 +36,8 @@ module.exports = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const { name, description, basePrice, price, duration, category, is_mobile, prices_by_size } = req.body || {};
-        const effectivePrice = basePrice != null ? basePrice : price;
+        const { name, description, basePrice, base_price, price, duration, category, is_mobile, prices_by_size } = req.body || {};
+        const effectivePrice = basePrice != null ? basePrice : (base_price != null ? base_price : price);
         if (!name || effectivePrice == null) {
             return res.status(400).json({ message: 'name and price are required.' });
         }
